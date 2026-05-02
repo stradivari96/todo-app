@@ -27,7 +27,7 @@ export default function List({ listId }) {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
     opacity: isDragging ? 0.5 : 1,
   }
 
@@ -42,7 +42,7 @@ export default function List({ listId }) {
     <div
       ref={setRef}
       style={style}
-      className="flex flex-col bg-[#ebecf0] rounded-xl w-64 shrink-0 max-h-[calc(100vh-8rem)] shadow"
+      className="flex flex-col bg-[#dde1e7] rounded-xl w-64 shrink-0 max-h-[calc(100vh-8rem)] shadow"
     >
       <ListHeader
         list={list}

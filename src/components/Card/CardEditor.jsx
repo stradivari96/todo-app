@@ -32,6 +32,7 @@ export default function CardEditor({ initialValue = '', onSave, onCancel, placeh
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
+        onBlur={handleSave}
         placeholder={placeholder}
         rows={3}
         className="w-full rounded px-2 py-1.5 text-sm text-gray-800 bg-white shadow resize-none outline-none focus:ring-2 focus:ring-blue-400"

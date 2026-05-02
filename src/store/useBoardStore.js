@@ -9,6 +9,9 @@ const useBoardStore = create(
       lists: [],
       cards: {},
       listOrder: [],
+      labels: {},
+      showLabelText: false,
+      toggleLabelText: () => set((state) => ({ showLabelText: !state.showLabelText })),
 
       addList: (title) => {
         const id = generateId()
@@ -39,11 +42,48 @@ const useBoardStore = create(
         })
       },
 
+      addLabel: (color, name = '') => {
+        const id = generateId()
+        set((state) => ({ labels: { ...state.labels, [id]: { id, color, name } } }))
+      },
+
+      updateLabel: (labelId, updates) => {
+        set((state) => ({
+          labels: { ...state.labels, [labelId]: { ...state.labels[labelId], ...updates } },
+        }))
+      },
+
+      deleteLabel: (labelId) => {
+        set((state) => {
+          const newLabels = { ...state.labels }
+          delete newLabels[labelId]
+          const newCards = {}
+          for (const [cid, card] of Object.entries(state.cards)) {
+            newCards[cid] = card.labelIds?.includes(labelId)
+              ? { ...card, labelIds: card.labelIds.filter((id) => id !== labelId) }
+              : card
+          }
+          return { labels: newLabels, cards: newCards }
+        })
+      },
+
+      toggleCardLabel: (cardId, labelId) => {
+        set((state) => {
+          const card = state.cards[cardId]
+          if (!card) return state
+          const labelIds = card.labelIds ?? []
+          const next = labelIds.includes(labelId)
+            ? labelIds.filter((id) => id !== labelId)
+            : [...labelIds, labelId]
+          return { cards: { ...state.cards, [cardId]: { ...card, labelIds: next } } }
+        })
+      },
+
       addCard: (listId, title) => {
         const id = generateId()
         const now = Date.now()
         set((state) => ({
-          cards: { ...state.cards, [id]: { id, title, description: '', createdAt: now, updatedAt: now } },
+          cards: { ...state.cards, [id]: { id, title, description: '', labelIds: [], createdAt: now, updatedAt: now } },
           lists: state.lists.map((l) =>
             l.id === listId ? { ...l, cardIds: [...l.cardIds, id] } : l
           ),
@@ -113,6 +153,7 @@ const useBoardStore = create(
         lists: state.lists,
         cards: state.cards,
         listOrder: state.listOrder,
+        labels: state.labels,
       }),
     }
   )

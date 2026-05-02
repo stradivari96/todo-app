@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { X, Trash2 } from 'lucide-react'
 import useBoardStore from '../../store/useBoardStore'
+import LabelPicker from './LabelPicker'
 
 export default function CardDetail({ cardId, listId, onClose }) {
   const card = useBoardStore((s) => s.cards[cardId])
@@ -59,6 +60,10 @@ export default function CardDetail({ cardId, listId, onClose }) {
         </div>
 
         <div className="px-5 pb-5">
+          <div className="mt-3 mb-4">
+            <LabelPicker cardId={cardId} />
+          </div>
+
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 mt-3">
             Description
           </label>

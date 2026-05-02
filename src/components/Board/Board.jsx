@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -28,6 +28,25 @@ export default function Board() {
   const moveList = useBoardStore((s) => s.moveList)
 
   const [activeItem, setActiveItem] = useState(null)
+  const scrollRef = useRef(null)
+  const panRef = useRef(null)
+
+  const handleBoardMouseDown = (e) => {
+    if (e.target !== e.currentTarget) return
+    panRef.current = { x: e.clientX, scrollLeft: scrollRef.current.scrollLeft }
+    e.currentTarget.style.cursor = 'grabbing'
+  }
+
+  const handleBoardMouseMove = (e) => {
+    if (!panRef.current) return
+    const dx = e.clientX - panRef.current.x
+    scrollRef.current.scrollLeft = panRef.current.scrollLeft - dx
+  }
+
+  const handleBoardMouseUp = (e) => {
+    panRef.current = null
+    e.currentTarget.style.cursor = ''
+  }
   const [addingList, setAddingList] = useState(false)
   const [newListTitle, setNewListTitle] = useState('')
 
@@ -95,18 +114,33 @@ export default function Board() {
     }
   }
 
+  const collisionDetection = useCallback((args) => {
+    if (activeItem?.type === 'list') {
+      const listContainers = args.droppableContainers.filter(({ id }) => listOrder.includes(id))
+      return closestCorners({ ...args, droppableContainers: listContainers })
+    }
+    return closestCorners(args)
+  }, [activeItem, listOrder])
+
   const activeCard = activeItem?.type === 'card' ? cards[activeItem.id] : null
   const activeCardListId = activeCard ? getListForCard(activeItem.id)?.id : null
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex items-start gap-3 p-4 overflow-x-auto min-h-full pb-6">
+      <div
+        ref={scrollRef}
+        onMouseDown={handleBoardMouseDown}
+        onMouseMove={handleBoardMouseMove}
+        onMouseUp={handleBoardMouseUp}
+        onMouseLeave={handleBoardMouseUp}
+        className="flex items-start gap-3 p-4 overflow-x-auto h-full pb-6"
+      >
         <SortableContext items={listOrder} strategy={horizontalListSortingStrategy}>
           {listOrder.map((listId) => (
             <List key={listId} listId={listId} />
@@ -115,7 +149,7 @@ export default function Board() {
 
         <div className="shrink-0 w-64">
           {addingList ? (
-            <div className="bg-[#ebecf0] rounded-xl p-2 flex flex-col gap-2 shadow">
+            <div className="bg-[#dde1e7] rounded-xl p-2 flex flex-col gap-2 shadow">
               <input
                 autoFocus
                 value={newListTitle}
@@ -158,7 +192,7 @@ export default function Board() {
         </div>
       </div>
 
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeCard && activeCardListId ? (
           <Card id={activeItem.id} listId={activeCardListId} isOverlay />
         ) : null}
