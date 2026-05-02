@@ -1,0 +1,1 @@
+{"name":"My Board","short_name":"Board","description":"A Trello-like kanban board","start_url":"/todo-app/","display":"standalone","background_color":"#1d7afc","theme_color":"#1d7afc","lang":"en","scope":"/todo-app/","icons":[{"src":"/todo-app/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
