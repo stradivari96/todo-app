@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Check } from 'lucide-react'
 import CardDetail from './CardDetail'
 import useBoardStore from '../../store/useBoardStore'
 
@@ -9,6 +10,7 @@ export default function Card({ id, listId, isOverlay = false }) {
   const labels = useBoardStore((s) => s.labels)
   const showLabelText = useBoardStore((s) => s.showLabelText)
   const toggleLabelText = useBoardStore((s) => s.toggleLabelText)
+  const toggleCardComplete = useBoardStore((s) => s.toggleCardComplete)
   const [detailOpen, setDetailOpen] = useState(false)
 
   const cardLabels = (card?.labelIds ?? []).map((lid) => labels[lid]).filter(Boolean)
@@ -38,7 +40,7 @@ export default function Card({ id, listId, isOverlay = false }) {
         {...attributes}
         {...listeners}
         onClick={() => { if (!isOverlay) setDetailOpen(true) }}
-        className={`bg-white rounded-lg shadow-sm px-3 py-2 mx-2 mb-1.5 select-none
+        className={`group bg-white rounded-lg shadow-sm px-3 py-2 mx-2 mb-1.5 select-none
           ${isOverlay
             ? 'shadow-lg rotate-2 opacity-90 cursor-grabbing'
             : 'hover:bg-gray-50 cursor-grab active:cursor-grabbing'}`}
@@ -62,7 +64,23 @@ export default function Card({ id, listId, isOverlay = false }) {
             ))}
           </div>
         )}
-        <p className="text-sm text-gray-800 break-words leading-snug">{card.title}</p>
+        <div className="flex items-start">
+          <div className={`shrink-0 overflow-hidden transition-[width] duration-150 ${card.completed ? 'w-5' : 'w-0 group-hover:w-5'}`}>
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); if (!isOverlay) toggleCardComplete(id) }}
+              className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-150
+                ${card.completed
+                  ? 'bg-green-500 border-green-500'
+                  : 'border-gray-300 hover:border-green-500'}`}
+            >
+              {card.completed && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+            </button>
+          </div>
+          <p className={`text-sm break-words leading-snug min-w-0 flex-1 ${card.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+            {card.title}
+          </p>
+        </div>
         {card.description && (
           <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-snug">{card.description}</p>
         )}

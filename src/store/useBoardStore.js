@@ -67,6 +67,14 @@ const useBoardStore = create(
         })
       },
 
+      toggleCardComplete: (cardId) => {
+        set((state) => {
+          const card = state.cards[cardId]
+          if (!card) return state
+          return { cards: { ...state.cards, [cardId]: { ...card, completed: !card.completed, updatedAt: Date.now() } } }
+        })
+      },
+
       toggleCardLabel: (cardId, labelId) => {
         set((state) => {
           const card = state.cards[cardId]
